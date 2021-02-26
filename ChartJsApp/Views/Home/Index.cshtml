@@ -1,0 +1,185 @@
+﻿@model  List<ChartJsApp.Models.ViewModel>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+
+
+
+    <div class="col-md-12">
+
+
+        <div class="panel">
+
+
+            <div class="panel-heading">
+
+                <h3 class="info">Chart Js Kullanımı:</h3>
+
+            </div>
+
+            <div class="panel-body" style="width:65%;height:90%;">
+
+                <canvas id="myChart" width="1200" height="700"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+@section scripts{
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css" />
+
+
+    <script>
+
+
+
+        $(document).ready(function () {
+
+            //12 ay
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            //chart bar js dataları
+            var newDataset = [];
+
+            //data renkleri
+            var currentcolor = "";
+
+
+            var datas = [];
+
+
+            var map = new Map();
+
+
+            @foreach (var item in Model.GroupBy(x=>x.Year))
+            {
+
+
+
+
+                @foreach (var item2 in item)
+                {
+
+                     
+                         
+                    //navlun fiyat datalarını aktarırız.
+
+                     @:datas.push("@item2.Freight");
+
+
+
+                    //yeni dizi oluştururuz.Aylık navlun ücretlerini
+                    @:map.set('@item2.Month', '@item2.Freight');
+
+
+                }
+
+
+                //bar için random renk atarız
+                @:currentcolor = getRandomColor();
+
+                //dataların kontrolü yapılır. 12 ay üzerinden.
+                @:controldatas(@item.Key, datas, map);
+
+
+                @:map.clear();
+
+
+                //Chart js e uygun formatta dataları ekleriz.
+                @:newDataset.push({ label: "@item.Key", data: datas, backgroundColor: [currentcolor, currentcolor, currentcolor, currentcolor, currentcolor, currentcolor, currentcolor, currentcolor, currentcolor, currentcolor, currentcolor, currentcolor] });
+
+                @:datas = []
+
+            }
+
+            
+           
+
+
+            //Chart js  objesi oluşur
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var mychart = new Chart(ctx, {
+
+                type: 'bar',
+                data: {
+
+                    labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                    //dataset olarak push edilen değerleri gösteririz.
+                    datasets: newDataset
+
+                }
+
+            });
+
+            //data kontrol (12 ay üzerinden)
+            function controldatas(label, values, aylar) {
+
+
+
+                if (values.length < 12) {
+
+                    veriler = [];
+                    var i;
+                    for (i = 0; i < 12; i++) {
+
+                        if (aylar.has(months[i])) {
+
+                            var ay = months[i];
+
+                            var deger = aylar.get(ay);
+                            veriler.push(deger);
+                            veriler.push()
+
+                        } else {
+
+                            veriler.push("0");
+
+                        }
+                    }
+                } else {
+
+                    aylar.clear();
+                    map.clear();
+                }
+
+            };
+
+            //Rastgele renk üretici
+            function getRandomColor() {
+                var letters = '0123456789ABCDEF'.split('');
+                var color = '#';
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            };
+
+
+
+
+
+
+
+
+
+
+        });
+
+
+
+    </script>
+
+
+
+}
